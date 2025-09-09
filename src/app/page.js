@@ -139,7 +139,7 @@ export default function Home() {
         </header>
 
         <section className="hero">
-          <h1 className="title">Free QR Code Generator ✨</h1>
+          <h1 className="title">Free QR Code Generator</h1>
           <p className="lead">
             Paste your URL, click generate, download the QR. No account, no
             database, unlimited scans.
