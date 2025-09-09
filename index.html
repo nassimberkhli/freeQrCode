@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QR Codes – Gratuit & Illimité</title>
+  <link rel="icon" href="/public/favicon.svg">
+  <meta name="description" content="Générez des QR codes gratuits et illimités. Aucune base de données, aucune inscription." />
+  <style>
+    :root { --bg:#0b0c10; --fg:#e5e7eb; --muted:#9aa0a6; --card:#111217; --accent:#7dd3fc; --border:#1f2430; }
+    * { box-sizing: border-box }
+    html,body { height: 100% }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Ubuntu, Arial;
+      background: linear-gradient(180deg,#0b0c10 0%,#0e1116 100%);
+      color: var(--fg);
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 24px }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { display:flex; align-items:center; gap:10px; }
+    .brand svg { width:28px; height:28px }
+    .hero { text-align: center; padding: 40px 0 10px }
+    h1 { font-size: clamp(28px, 3.4vw, 44px); margin: 0 0 8px }
+    p.lead { color: var(--muted); margin: 0 }
+    .card {
+      background: linear-gradient(180deg,var(--card), #0d0f14 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px; margin-top: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.02);
+    }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px }
+    @media (min-width: 860px) { .grid { grid-template-columns: 1.35fr .9fr } }
+    label { font-weight: 600; font-size: 14px; color: var(--fg); display:block; margin-bottom: 6px }
+    input, select {
+      width: 100%; padding: 12px 14px; font-size: 16px; color: var(--fg);
+      background: #0f1117; border: 1px solid var(--border); border-radius: 10px; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(125,211,252,.2) }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+    .btn {
+      appearance: none; border: 1px solid var(--border); background: #111319; color: var(--fg);
+      padding: 12px 14px; border-radius: 10px; cursor: pointer; font-weight: 600; text-decoration: none;
+      text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .btn:hover { border-color: var(--accent) }
+    .btn.primary { background: linear-gradient(180deg,#1a2234,#111827); border-color:#182132 }
+    .btn.accent { background: linear-gradient(180deg,#1b2a37,#13222f); border-color:#184055; color:#d9fbff }
+    .hint { color: var(--muted); font-size: 13px }
+    .preview {
+      display:grid; place-items:center; min-height: 320px; background: #0c0f14; border: 1px dashed #202635; border-radius: 12px;
+    }
+    .footer { color: var(--muted); font-size: 13px; text-align: center; padding: 32px 0 16px }
+    .badge { display:inline-block; padding: 6px 10px; border:1px solid var(--border); border-radius: 999px; font-size: 12px; color:var(--muted) }
+    .sp { height: 12px }
+    .hidden { display:none }
+  </style>
+  <!-- Librairie QR (client-side, aucune donnée envoyée) -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h6v2H6v2H4V4Zm10 0h6v6h-2V6h-4V4ZM4 14h2v4h4v2H4v-6Zm14 0h2v6h-6v-2h4v-4Z" fill="#7dd3fc"/></svg>
+        <strong>QR Codes</strong><span class="badge">gratuit • illimité • no-DB</span>
+      </div>
+      <a class="btn" href="#" id="shareBtn" title="Partager ce générateur">Partager</a>
+    </header>
+
+    <section class="hero">
+      <h1>Générateur de QR codes <span style="color:#7dd3fc">gratuit & illimité</span></h1>
+      <p class="lead">Collez votre URL, téléchargez le QR en <strong>PNG</strong> ou <strong>SVG</strong>. Aucune base de données, aucune limite.</p>
+    </section>
+
+    <section class="card grid">
+      <div>
+        <label for="url">Votre URL</label>
+        <input id="url" type="url" placeholder="https://exemple.com" spellcheck="false" autocomplete="off" />
+        <div class="sp"></div>
+
+        <div class="row">
+          <div>
+            <label for="size">Taille (px)</label>
+            <select id="size">
+              <option>256</option><option selected>384</option><option>512</option><option>640</option><option>768</option>
+            </select>
+          </div>
+          <div>
+            <label for="ec">Correction d’erreurs</label>
+            <select id="ec">
+              <option value="L">L (7%)</option>
+              <option value="M" selected>M (15%)</option>
+              <option value="Q">Q (25%)</option>
+              <option value="H">H (30%)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sp"></div>
+        <div class="row">
+          <button class="btn primary" id="generate">Générer le QR</button>
+          <button class="btn" id="clear">Effacer</button>
+        </div>
+
+        <p class="hint" style="margin-top:10px">Astuce : le QR statique n’expire jamais. Il reste valide tant que votre URL reste accessible.</p>
+      </div>
+
+      <div>
+        <div class="preview" id="preview">
+          <span class="hint">Le QR apparaîtra ici</span>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <a class="btn accent" id="downloadPng" download="qrcode.png" aria-disabled="true">Télécharger PNG</a>
+          <a class="btn accent" id="downloadSvg" download="qrcode.svg" aria-disabled="true">Télécharger SVG</a>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer">Fait pour être hébergé sur Vercel/Netlify/GitHub Pages. Aucune donnée collectée. © Toi.</p>
+  </div>
+
+  <script>
+    // --- helpers
+    const $ = (s) => document.querySelector(s);
+    const urlInput = $('#url'), sizeSel = $('#size'), ecSel = $('#ec');
+    const btnGen = $('#generate'), btnClear = $('#clear');
+    const preview = $('#preview'), dlPNG = $('#downloadPng'), dlSVG = $('#downloadSvg');
+    const shareBtn = $('#shareBtn');
+
+    const ECMap = { L: 1, M: 0, Q: 3, H: 2 }; // mapping pour qrcode-generator
+
+    let currentPNG = null, currentSVG = null;
+
+    function isValidURL(u) {
+      try { const x = new URL(u); return !!x.protocol && !!x.host; } catch { return false; }
+    }
+
+    function drawCanvasFromQR(qr, size) {
+      const count = qr.getModuleCount();
+      const marginModules = Math.round(count * 0.08); // ~8% de marge
+      const modules = count + marginModules * 2;
+      const scale = Math.floor(size / modules) || 1;
+      const pxSize = modules * scale;
+
+      const c = document.createElement('canvas');
+      c.width = c.height = pxSize;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,pxSize,pxSize); // fond blanc pour l’impression
+      ctx.fillStyle = '#000000';
+
+      for (let r = 0; r < count; r++) {
+        for (let c2 = 0; c2 < count; c2++) {
+          if (qr.isDark(r, c2)) {
+            const x = (c2 + marginModules) * scale;
+            const y = (r + marginModules) * scale;
+            ctx.fillRect(x, y, scale, scale);
+          }
+        }
+      }
+      return c;
+    }
+
+    function svgFromQR(qr, size) {
+      const count = qr.getModuleCount();
+      const marginModules = Math.round(count * 0.08);
+      const modules = count + marginModules * 2;
+      const scale = Math.floor(size / modules) || 1;
+      const pxSize = modules * scale;
+      const unit = scale;
+
+      let path = '';
+      for (let r = 0; r < count; r++) {
+        for (let c = 0; c < count; c++) {
+          if (qr.isDark(r, c)) {
+            const x = (c + marginModules) * unit;
+            const y = (r + marginModules) * unit;
+            path += `M${x} ${y}h${unit}v${unit}h-${unit}z`;
+          }
+        }
+      }
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${pxSize} ${pxSize}" width="${pxSize}" height="${pxSize}">
+           <rect width="100%" height="100%" fill="#ffffff"/>
+           <path d="${path}" fill="#000000"/>
+         </svg>`;
+      return svg;
+    }
+
+    function setDownloads(pngURL, svgText) {
+      if (pngURL) {
+        dlPNG.href = pngURL; dlPNG.setAttribute('aria-disabled','false');
+      } else {
+        dlPNG.removeAttribute('href'); dlPNG.setAttribute('aria-disabled','true');
+      }
+      if (svgText) {
+        const blob = new Blob([svgText], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        dlSVG.href = url; dlSVG.setAttribute('aria-disabled','false');
+        currentSVG && URL.revokeObjectURL(currentSVG);
+        currentSVG = url;
+      } else {
+        dlSVG.removeAttribute('href'); dlSVG.setAttribute('aria-disabled','true');
+      }
+    }
+
+    function renderQR() {
+      const val = urlInput.value.trim();
+      if (!isValidURL(val)) {
+        preview.innerHTML = '<span class="hint">Entrez une URL valide (https://…)</span>';
+        setDownloads(null, null);
+        return;
+      }
+      const size = parseInt(sizeSel.value, 10);
+      const ec = ECMap[ecSel.value] ?? 0;
+
+      // Génération QR
+      const qr = qrcode(0, ec);
+      qr.addData(val);
+      qr.make();
+
+      // Canvas -> PNG
+      const canvas = drawCanvasFromQR(qr, size);
+      preview.innerHTML = '';
+      preview.appendChild(canvas);
+
+      const pngURL = canvas.toDataURL('image/png');
+      currentPNG && URL.revokeObjectURL(currentPNG);
+      currentPNG = pngURL;
+
+      // SVG
+      const svgText = svgFromQR(qr, size);
+
+      setDownloads(pngURL, svgText);
+    }
+
+    btnGen.addEventListener('click', renderQR);
+    urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') renderQR(); });
+    sizeSel.addEventListener('change', () => { if (dlPNG.getAttribute('aria-disabled') === 'false') renderQR(); });
+    ecSel.addEventListener('change', () => { if (dlPNG.getAttribute('aria-disabled') === 'false') renderQR(); });
+
+    btnClear.addEventListener('click', () => {
+      urlInput.value = '';
+      preview.innerHTML = '<span class="hint">Le QR apparaîtra ici</span>';
+      setDownloads(null, null);
+      urlInput.focus();
+    });
+
+    if (navigator.share) {
+      shareBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try { await navigator.share({ title: document.title, text: 'Générez des QR codes gratuits et illimités', url: location.href }); }
+        catch {}
+      });
+    } else {
+      shareBtn.href = 'mailto:?subject=Générateur%20de%20QR%20gratuit&body=' + encodeURIComponent(location.href);
+    }
+
+    // Démo : valeur par défaut (tu peux supprimer ces 2 lignes)
+    urlInput.value = 'https://portfolio-nfb5.vercel.app/';
+    renderQR();
+  </script>
+</body>
+</html>
+
